@@ -30,3 +30,6 @@ sub = test.join(pd.DataFrame(labs,
     columns=["passholder_type"]))[["trip_id", "passholder_type"]]
 
 sub.to_csv("data/sub.csv", index=False)
+
+with open("data/model.pkl", "wb") as f:
+    pickle.dump(rf, f)
