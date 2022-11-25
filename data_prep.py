@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 
 from sklearn import preprocessing
 
+import pickle
 
 raw_df = pd.read_csv("data/train_set.csv")
 
@@ -43,8 +44,8 @@ def clean_nums(x):
 
 raw_df["bike_id"] = raw_df["bike_id"].apply(clean_nums)
 
-le = preprocessing.LabelEncoder()
-raw_df["bike_id"] = le.fit_transform(raw_df["bike_id"])
+le_bike_id = preprocessing.LabelEncoder()
+raw_df["bike_id"] = le_bike_id.fit_transform(raw_df["bike_id"])
 # or one hot encode
 
 # Los días de plan duration pasan los 365 ... se llevan a nan
@@ -53,15 +54,15 @@ raw_df.loc[raw_df["plan_duration"] > 365, "plan_duration"] = np.nan
 
 # Trip category move to 1 and -1
 
-le = preprocessing.LabelEncoder()
-raw_df["trip_route_category"] = le.fit_transform(raw_df["trip_route_category"])
+le_trip = preprocessing.LabelEncoder()
+raw_df["trip_route_category"] = le_trip.fit_transform(raw_df["trip_route_category"])
 raw_df["trip_route_category"] = (raw_df["trip_route_category"] - 0.5) * 2
 
 # passholder_type is target, change to int label
 
 raw_df["passholder_type"] = raw_df["passholder_type"].fillna("nan")
-le = preprocessing.LabelEncoder()
-raw_df["passholder_type"] = le.fit_transform(raw_df["passholder_type"])
+le_passholder = preprocessing.LabelEncoder()
+raw_df["passholder_type"] = le_passholder.fit_transform(raw_df["passholder_type"])
 
 #lb = preprocessing.LabelBinarizer()
 #ohe_pass = lb.fit_transform(raw_df["passholder_type"])
@@ -131,12 +132,25 @@ for (_, row) in tqdm(raw_df.iterrows(), total=len(raw_df)):
     if e_stat in e_stat_to_l:
         row.loc[["end_lat", "end_lon"]] = e_stat_to_l[e_stat]
 
-le = preprocessing.LabelEncoder()
-raw_df["start_station"] = le.fit_transform(raw_df["start_station"])
-le = preprocessing.LabelEncoder()
-raw_df["end_station"] = le.fit_transform(raw_df["end_station"])
+le_start_s = preprocessing.LabelEncoder()
+raw_df["start_station"] = le_start_s.fit_transform(raw_df["start_station"])
+le_end_s = preprocessing.LabelEncoder()
+raw_df["end_station"] = le_end_s.fit_transform(raw_df["end_station"])
 
 raw_df = raw_df.drop("start_time", axis=1)
 raw_df = raw_df.drop("end_time", axis=1)
 
+
+raw_df = raw_df.replace(np.nan, -1)
 raw_df.to_csv("data/cool_data.csv", index=False)
+
+with open("data/le_bike_id.pkl", "wb") as f:
+    pickle.dump(le_bike_id, f)
+with open("data/le_trip.pkl", "wb") as f:
+    pickle.dump(le_trip, f)
+with open("data/le_passholder.pkl", "wb") as f:
+    pickle.dump(le_passholder, f)
+with open("data/le_start_s.pkl", "wb") as f:
+    pickle.dump(le_start_s, f)
+with open("data/le_end_s.pkl", "wb") as f:
+    pickle.dump(le_end_s, f)
