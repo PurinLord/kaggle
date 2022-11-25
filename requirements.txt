@@ -2,3 +2,5 @@ numpy==1.19.1
 pandas==1.1.5
 sklearn==0.0
 tqdm==4.42.0
+fastapi==0.87.0
+uvicorn==0.20.0
